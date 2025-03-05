@@ -1,144 +1,239 @@
-const maxRounds = 10;
-let scores = Array(maxRounds).fill(0); // Array to track scores
-let resetStates = Array(maxRounds).fill(false); // Array to track reset states
-let selectedRound = -1; // To keep track of the selected round
+        function createRow(startNumber, count, rowName, rowColor) {
+    const rowContainer = document.createElement("div");
+    rowContainer.classList.add("row-container");
 
-// Dynamically generate round buttons and their sections
-function createRounds() {
-    const roundsContainer = document.querySelector('.round-buttons');
+    const rowNameInput = document.createElement("input");
+    rowNameInput.classList.add("row-name");
+    rowNameInput.value = rowName; // Set initial row name
+    rowNameInput.style.color = rowColor;
+    rowNameInput.style.border = "none";
+    rowNameInput.style.background = "transparent";
+    rowNameInput.style.outline = "none";
+    rowNameInput.style.width = "100%";
 
-    for (let i = 0; i < maxRounds; i++) {
-        // Create Round Button
-        const roundButton = document.createElement('button');
-        roundButton.classList.add('round-button', 'grey');
-        roundButton.innerHTML = `<div class="round">Round ${i + 1}</div><div class="score">Score: 0</div>`;
-        roundButton.onclick = () => showRoundDetails(i, roundButton);
-        roundsContainer.appendChild(roundButton);
+    rowContainer.appendChild(rowNameInput);
 
-        // Create Round Details Section
-        const roundDetails = document.createElement('div');
-        roundDetails.classList.add('round-section');
-        roundDetails.id = `round-${i + 1}-details`;
+    const row = document.createElement("div");
+    row.classList.add("row");
 
-        roundDetails.innerHTML = `
-            <h2>Round ${i + 1} Details</h2>
-            <div class="score-controls">
-                <button onclick="changeScore(${i}, -1)">-</button>
-                <input id="score-input-${i}" type="number" value="0" min="0" max="${i + 1}" onchange="updateScore(${i})" />
-                <button onclick="changeScore(${i}, 1)">+</button>
-            </div>
-            <button class="reset-button" onclick="toggleReset(${i})">Reset Score</button>
-        `;
-        document.body.appendChild(roundDetails);
+    const container = document.createElement("div");
+    container.classList.add("container");
+
+    for (let i = 0; i < count; i++) {
+        const field = document.createElement("div");
+        field.classList.add("field");
+
+        const topLabel = document.createElement("label");
+        topLabel.classList.add("top-label");
+        topLabel.textContent = startNumber + i;
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.classList.add("row-input");
+        input.setAttribute("data-top-label", startNumber + i);
+        input.placeholder = "";
+
+        const bottomLabel = document.createElement("label");
+        bottomLabel.classList.add("bottom-label");
+        bottomLabel.textContent = "N/D";
+
+        field.appendChild(topLabel);
+        field.appendChild(input);
+        field.appendChild(bottomLabel);
+        container.appendChild(field);
+    }
+
+    const totalDiv = document.createElement("div");
+    totalDiv.classList.add("total");
+    totalDiv.textContent = "0";
+    totalDiv.style.backgroundColor = rowColor;
+
+    row.appendChild(container);
+    row.appendChild(totalDiv);
+    rowContainer.appendChild(row);
+
+    document.getElementById("rows-container").appendChild(rowContainer);
+}
+
+function focusFirstCell() {
+    const firstRow = document.querySelector(".row-container");
+    if (firstRow) {
+        const firstInput = firstRow.querySelector(".row-input");
+        if (firstInput) {
+            firstInput.focus();
+        }
     }
 }
 
-// Show Round Details and Highlight Selected Round
-function showRoundDetails(round, roundButton) {
-    const allSections = document.querySelectorAll('.round-section');
-    allSections.forEach(section => section.style.display = 'none'); // Hide all details
 
-    const roundDetails = document.getElementById(`round-${round + 1}-details`);
-    roundDetails.style.display = 'block'; // Show selected round details
+function generateTable() {
+    const rowsContainer = document.getElementById("rows-container");
+    rowsContainer.innerHTML = ""; // Clear previous rows
 
-    // Remove highlight from the previously selected round
-    if (selectedRound !== -1) {
-        const previousButton = document.querySelectorAll('.round-button')[selectedRound];
-        previousButton.classList.remove('highlighted');
+    const numRows = parseInt(document.getElementById("numRows").value);
+    const numInputs = parseInt(document.getElementById("numInputs").value);
+    const colors = ["#3498db", "#e74c3c", "#2ecc71", "#f39c12", "#9b59b6"]; // Different row colors
+
+    // Generate the rows
+    for (let i = 1; i <= numRows; i++) {
+        createRow(1, numInputs, `Joueur ${i}`, colors[i % colors.length]);
     }
-
-    // Highlight the current selected round button
-    roundButton.classList.add('highlighted');
-    selectedRound = round; // Update selected round index
+    toggleControls();
+    focusFirstCell(); // Set focus on the first input
 }
 
-// Change Score
-function changeScore(round, delta) {
-    if (resetStates[round]) return; // Cannot change score if reset is triggered
 
-    let scoreInput = document.getElementById(`score-input-${round}`);
-    let currentScore = parseInt(scoreInput.value);
-    let maxScore = round + 1;
 
-    // Update score
-    let newScore = currentScore + delta;
+        function updateTotals() {
+            document.querySelectorAll(".row").forEach(row => {
+                let sum = 0;
+                row.querySelectorAll(".row-input").forEach(input => {
+                    let value = parseFloat(input.value) || 0;
+                    sum += value;
+                });
+                row.querySelector(".total").textContent = sum;
+            });
+        }
 
-    if (newScore >= 0 && newScore <= maxScore) {
-        scoreInput.value = newScore;
-        scores[round] = newScore;
-    }
 
-    updateRoundButton(round);
-    updateRoundScore(round);
-    updateGrandTotal();
+        function toggleControls() {
+    const controls = document.getElementById("controlsContainer");
+    controls.classList.toggle("hidden");
+    focusFirstCell();
 }
 
-// Update Round Button Color
-function updateRoundButton(round) {
-    const roundButton = document.querySelectorAll('.round-button')[round];
-    const score = scores[round];
-    const maxScore = round + 1;
 
-    // Default to grey if score is 0 and reset is not triggered
-    if (score === 0 && !resetStates[round]) {
-        roundButton.classList.add('grey');
-        roundButton.classList.remove('blue', 'green', 'red');
-    } 
-    // Blue if score is between 0 and max score
-    else if (score > 0 && score < maxScore && !resetStates[round]) {
-        roundButton.classList.add('blue');
-        roundButton.classList.remove('green', 'grey', 'red');
-    } 
-    // Green if score is equal to max score
-    else if (score === maxScore && !resetStates[round]) {
-        roundButton.classList.add('green');
-        roundButton.classList.remove('blue', 'grey', 'red');
-    } 
-    // Red if reset is triggered
-    else if (resetStates[round]) {
-        roundButton.classList.add('red');
-        roundButton.classList.remove('blue', 'green', 'grey');
-    }
-}
 
-// Update Round Score Display
-function updateRoundScore(round) {
-    const roundScoreDisplay = document.querySelectorAll('.round-button .score')[round];
-    roundScoreDisplay.textContent = `Score: ${scores[round]}`;
-}
 
-// Toggle Reset State
-function toggleReset(round) {
-    resetStates[round] = !resetStates[round];
-    updateRoundButton(round);
-    updateRoundScore(round);
-    updateGrandTotal();
-}
+        document.addEventListener("input", function(event) {
+            if (event.target.classList.contains("row-input")) {
+                let input = event.target;
+                let topLabel = parseInt(input.getAttribute("data-top-label"));
+                let bottomLabel = input.nextElementSibling;
+                let value = input.value.trim();
 
-// Update Grand Total
-function updateGrandTotal() {
-    const total = scores.reduce((sum, score) => sum + score, 0);
-    document.getElementById('grand-total').textContent = total;
-}
+                // Allow only numbers ≤ topLabel, "x", or "z"
+                if (!/^\d+$/.test(value) && value !== "x" && value !== "z") {
+                    input.value = "";
+                    bottomLabel.textContent = "";
+                    input.style.backgroundColor = "#f9f9f9";
+                    return;
+                }
 
-// Update the Score based on the input field
-function updateScore(round) {
-    let scoreInput = document.getElementById(`score-input-${round}`);
-    let currentScore = parseInt(scoreInput.value);
-    let maxScore = round + 1;
+                let numericValue = parseInt(value);
 
-    if (currentScore < 0) {
-        scoreInput.value = 0;
-    } else if (currentScore > maxScore) {
-        scoreInput.value = maxScore;
-    }
+                if (value === "x") {
+                    input.value = topLabel + topLabel;
+                    bottomLabel.textContent = "COMPLET";
+                    bottomLabel.style.color = "#27ae60";
+                    input.style.backgroundColor = "#27ae60"; // Green
+                    input.style.color = "white";
+                } else if (value === "z") {
+                    input.value = topLabel + topLabel + 5;
+                    bottomLabel.textContent = "PARFAIT";
+                    bottomLabel.style.color = "#f39c12";
+                    input.style.backgroundColor = "#f39c12"; // Orange
+                    input.style.color = "white";
+                } else if (numericValue === 0) {
+                    bottomLabel.textContent = "MANQUÉ";
+                    bottomLabel.style.color = "#e74c3c";
+                    input.style.backgroundColor = "#e74c3c"; // Red
+                    input.style.color = "white";
+                } else if (numericValue <= topLabel) {
+                    bottomLabel.textContent = "ARRET";
+                    bottomLabel.style.color = "#2c3e50";
+                    input.style.backgroundColor = "#2c3e50"; // Dark Blue
+                    input.style.color = "white";
+                } else {
+                    input.value = "";
+                    bottomLabel.textContent = "";
+                    input.style.backgroundColor = "#f9f9f9";
+                }
 
-    scores[round] = parseInt(scoreInput.value);
-    updateRoundButton(round);
-    updateRoundScore(round);
-    updateGrandTotal();
-}
+                updateTotals();
+            }
+        });
 
-// Initial Setup
-createRounds();
-updateGrandTotal();
+        document.addEventListener("keydown", function (event) {
+            const focusedInput = document.activeElement;
+        
+            if (focusedInput && focusedInput.classList.contains("row-input")) {
+                const currentRow = focusedInput.closest(".row");
+        const currentRowContainer = currentRow.closest(".row-container");
+        const allRows = Array.from(document.querySelectorAll(".row-container"));
+        const rowInputs = Array.from(currentRow.querySelectorAll(".row-input"));
+        const currentIndex = rowInputs.indexOf(focusedInput);
+
+        const currentRowIndex = allRows.indexOf(currentRowContainer);
+        const totalRows = allRows.length;
+        
+                // Move to the same column in the next row (w key)
+        // Move to the same column in the next row (w key) with looping
+        if (event.key === "w") {
+            event.preventDefault();
+            const nextRowContainer = allRows[(currentRowIndex + 1) % totalRows]; // Loop to first row if at the end
+            const nextRowInputs = Array.from(nextRowContainer.querySelectorAll(".row-input"));
+            if (nextRowInputs.length > 0) {
+                nextRowInputs[currentIndex % nextRowInputs.length].focus();
+            }
+        }
+
+        // Move to the same column in the previous row (q key) with looping
+        if (event.key === "q") {
+            event.preventDefault();
+            const prevRowContainer = allRows[(currentRowIndex - 1 + totalRows) % totalRows]; // Loop to last row if at the top
+            const prevRowInputs = Array.from(prevRowContainer.querySelectorAll(".row-input"));
+            if (prevRowInputs.length > 0) {
+                prevRowInputs[currentIndex % prevRowInputs.length].focus();
+            }
+        }
+        
+                // Move to the next column in the same row (s key) with looping
+        if (event.key === "s") {
+            event.preventDefault();
+            const nextIndex = (currentIndex + 1) % rowInputs.length; // Loop to first column if at the end
+            rowInputs[nextIndex].focus();
+        }
+
+        // Move to the previous column in the same row (a key) with looping
+        if (event.key === "a") {
+            event.preventDefault();
+            const prevIndex = (currentIndex - 1 + rowInputs.length) % rowInputs.length; // Loop to last column if at the start
+            rowInputs[prevIndex].focus();
+        }
+            }
+        
+            // Increment value when pressing "b"
+            if (event.key === "b") {
+                event.preventDefault();
+        
+                if (focusedInput && focusedInput.classList.contains("row-input")) {
+                    let currentValue = parseFloat(focusedInput.value) || 0;
+                    let topLabel = parseInt(focusedInput.getAttribute("data-top-label"));
+                    let bottomLabel = focusedInput.nextElementSibling;
+        
+                    let newValue = currentValue + 1;
+                    if (newValue >= topLabel) {
+                        newValue = 0;
+                    }
+        
+                    focusedInput.value = newValue;
+        
+                    if (newValue === topLabel) {
+                        bottomLabel.textContent = "COMPLET";
+                        bottomLabel.style.color = "#27ae60";
+                        focusedInput.style.backgroundColor = "#27ae60";
+                        focusedInput.style.color = "white";
+                    } else if (newValue < topLabel) {
+                        bottomLabel.textContent = "ARRET";
+                        bottomLabel.style.color = "#2c3e50";
+                        focusedInput.style.backgroundColor = "#2c3e50";
+                        focusedInput.style.color = "white";
+                    }
+        
+                    focusedInput.dispatchEvent(new Event("input"));
+                    updateTotals();
+                }
+            }
+        });
+        
