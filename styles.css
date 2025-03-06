@@ -1,4 +1,4 @@
-body {
+html,body {
             font-family: 'Arial', sans-serif;
             display: flex;
             flex-direction: column;
@@ -7,11 +7,15 @@ body {
             height: 100vh;
             margin: 0;
             background-color: #f4f4f4;
+            overflow-x: hidden; /* Prevents horizontal scrolling */
+    width: 100%; /* Ensures the body takes up the full viewport width */
         }
 
 #rows-container {
     max-height: 80vh; /* Adjust as needed */
     overflow-y: auto; /* Enables vertical scrolling */
+    max-width: 100%; /* Prevents it from exceeding the viewport width */
+    overflow-x: hidden; /* Ensures no horizontal scrolling within this container */
     width: 90%; /* Ensures proper spacing */
     padding: 10px;
     border: 1px solid #ccc; /* Optional: Visual boundary */
@@ -20,7 +24,7 @@ body {
 }
 
 .row-name {
-    font-size: 52px;
+    font-size: 60px;
     font-weight: bold;
     color: #333;
     margin-bottom: 10px;
@@ -29,6 +33,7 @@ body {
 }
 
 .row {
+    flex-wrap: wrap; /* Ensures that content wraps instead of causing horizontal overflow */
     display: flex;
     align-items: flex-start; /* Align the row content to the top */
     gap: 20px;
@@ -63,9 +68,9 @@ body {
     margin-bottom: 5px;
     text-transform: uppercase;     /* Makes the text all caps for emphasis */
     letter-spacing: 1px;           /* Adds slight spacing between letters */
-    background-color: #000000;     /* Black background to make the text pop */
+    background-color: #717171;     /* Black background to make the text pop */
     padding: 10px;                 /* Increased padding for a larger background */
-    border-radius: 5px;            /* Rounded corners for the background */
+    border-radius: 50%;            /* Rounded corners for the background */
     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
     display: inline-block;         /* Ensures the background expands to fit the text */
     width: 100%;                   /* Ensures it takes up the full width of the container */
@@ -83,6 +88,7 @@ body {
             text-align: center;
             transition: all 0.2s ease-in-out;
             background-color: #f9f9f9;
+            caret-color: transparent; /* Hides the cursor */
         }
 
         input:focus {

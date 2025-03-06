@@ -7,19 +7,21 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h2>Dynamic Input Fields</h2>
+    <h2>Feuille de pointage</h2>
     <div id="rows-container"></div>
-    
+    <p></p>
     <button class="toggle-button" onclick="toggleControls()">Show/Hide Controls</button>
 
 <div class="controls-container" id="controlsContainer">
     <div class="controls">
-        <label>Nombre de joueurs: <input type="number" id="numRows" min="1" value="3"></label>
-        <label>Nombre de rondes: <input type="number" id="numInputs" min="1" value="10"></label>
-        <button onclick="generateTable()">Generate Table</button>
-    </div>
-</div>
+        <label>Joueurs: <input type="number" id="numRows" min="1" value="2"></label>
+        <label>Rondes: <input type="number" id="numInputs" min="1" value="10"></label>
+        <label>ZA value: <input type="number" id="customPlusFiveValue" value="5"></label>
 
+    </div>
+    <p></p>
+    <button onclick="generateTable()">Generate Table</button>
+</div>
 
 <script src="script.js" defer></script>
 </body>
